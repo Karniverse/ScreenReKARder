@@ -20,26 +20,38 @@ install_modules(required_module)
 #import example_module
 
 import tkinter as tk
+from tkinter import ttk
 import pygetwindow as gw
 import pyautogui
 from PIL import ImageGrab
 import cv2
 import numpy as np
 
-
 class DesktopRecorder:
     def __init__(self, root):
         self.root = root
-        self.root.title("Desktop Recorder")
+        self.root.title("ReKARder")
 
+        # Frame rate options
+        self.frame_rate_options = [15, 30, 60]  # Add more frame rates if needed
+        self.selected_frame_rate = tk.StringVar(value=str(self.frame_rate_options[0]))
+
+        # UI elements
         self.start_button = tk.Button(root, text="Start Recording", command=self.start_recording)
         self.start_button.pack(pady=10)
 
         self.stop_button = tk.Button(root, text="Stop Recording", command=self.stop_recording, state=tk.DISABLED)
         self.stop_button.pack(pady=10)
 
+        self.frame_rate_label = tk.Label(root, text="Frame Rate:")
+        self.frame_rate_label.pack(pady=5)
+
+        self.frame_rate_dropdown = ttk.Combobox(root, textvariable=self.selected_frame_rate, values=self.frame_rate_options)
+        self.frame_rate_dropdown.pack(pady=5)
+
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
+        # Recording variables
         self.recording = False
         self.video_writer = None
 
@@ -49,8 +61,9 @@ class DesktopRecorder:
         self.stop_button.config(state=tk.NORMAL)
 
         screen_width, screen_height = pyautogui.size()
+        selected_fps = int(self.selected_frame_rate.get())
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        self.video_writer = cv2.VideoWriter("recording.mp4", fourcc, 20.0, (screen_width, screen_height))
+        self.video_writer = cv2.VideoWriter("recording.mp4", fourcc, selected_fps, (screen_width, screen_height))
 
         self.record_screen()
 
